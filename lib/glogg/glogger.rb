@@ -137,6 +137,31 @@ module GLogg
 		@@log_func.call L_D4, m
 	end
 
+	def self.l_f &m
+		log_f? and msg = yield and @@log_func.call L_FAT, msg
+	end
+	def self.l_e &m
+		log_e? and msg = yield and @@log_func.call L_ERR, msg
+	end
+	def self.l_w &m
+		log_w? and msg = yield and @@log_func.call L_WRN, msg
+	end
+	def self.l_i &m
+		log_i? and msg = yield and @@log_func.call L_INF, msg
+	end
+	def self.l_d &m
+		log_d? and msg = yield and @@log_func.call L_DBG, msg
+	end
+	def self.l_d2 &m
+		log_d2? and msg = yield and @@log_func.call L_D2, msg
+	end
+	def self.l_d3 &m
+		log_d3? and msg = yield and @@log_func.call L_D3, msg
+	end
+	def self.l_d4 &m
+		log_d4? and msg = yield and @@log_func.call L_D4, msg
+	end
+
 	private
 
 	# function for logging into file in locking mode

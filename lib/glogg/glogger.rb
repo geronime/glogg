@@ -113,56 +113,94 @@ module GLogg
 	end
 
 	def self.log_f m
+		session_log L_FAT, m
 		@@log_func.call L_FAT, m
 	end
 	def self.log_e m
+		session_log L_ERR, m
 		@@log_func.call L_ERR, m
 	end
 	def self.log_w m
+		session_log L_WRN, m
 		@@log_func.call L_WRN, m
 	end
 	def self.log_i m
+		session_log L_INF, m
 		@@log_func.call L_INF, m
 	end
 	def self.log_d m
+		session_log L_DBG, m
 		@@log_func.call L_DBG, m
 	end
 	def self.log_d2 m
+		session_log L_D2, m
 		@@log_func.call L_D2, m
 	end
 	def self.log_d3 m
+		session_log L_D3, m
 		@@log_func.call L_D3, m
 	end
 	def self.log_d4 m
+		session_log L_D4, m
 		@@log_func.call L_D4, m
 	end
 
 	def self.l_f &m
+		session_log L_FAT, m
 		log_f? and msg = yield and @@log_func.call L_FAT, msg
 	end
 	def self.l_e &m
+		session_log L_ERR, m
 		log_e? and msg = yield and @@log_func.call L_ERR, msg
 	end
 	def self.l_w &m
+		session_log L_WRN, m
 		log_w? and msg = yield and @@log_func.call L_WRN, msg
 	end
 	def self.l_i &m
+		session_log L_INF, m
 		log_i? and msg = yield and @@log_func.call L_INF, msg
 	end
 	def self.l_d &m
+		session_log L_DBG, m
 		log_d? and msg = yield and @@log_func.call L_DBG, msg
 	end
 	def self.l_d2 &m
+		session_log L_D2, m
 		log_d2? and msg = yield and @@log_func.call L_D2, msg
 	end
 	def self.l_d3 &m
+		session_log L_D3, m
 		log_d3? and msg = yield and @@log_func.call L_D3, msg
 	end
 	def self.l_d4 &m
+		session_log L_D4, m
 		log_d4? and msg = yield and @@log_func.call L_D4, msg
 	end
 
+	def self.start_session
+		Thread.current['glogg_session'] = []
+	end
+
+	def self.close_session evaluate = false, level = nil
+		buffer = Thread.current['glogg_session']
+		Thread.current['glogg_session'] = nil
+
+		if evaluate and buffer
+			level = @@LOG_LVL if level.nil?
+			buffer.delete_if {|lvl, m| lvl > level }.map do |lvl, m|
+				m.is_a?(Proc) ? m.call.to_s : m.to_s
+			end
+		end
+	end
+
 	private
+
+	def self.session_log lvl, m
+		if Thread.current['glogg_session']
+			Thread.current['glogg_session'] << [lvl, m]
+		end
+	end
 
 	# function for logging into file in locking mode
 	# return false in case of error (during fileopen, true otherwise
